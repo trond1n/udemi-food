@@ -99,7 +99,7 @@ window.addEventListener('DOMContentLoaded', () => {
             if (time.total <= 0) {
                 clearInterval(timeInterval);
             }
-        };
+        }
     };
 
     setClock('.timer', deadline);
@@ -112,13 +112,13 @@ window.addEventListener('DOMContentLoaded', () => {
     const openModal = () => {
         modal.classList.toggle('show');
         document.body.style.overflow = 'hidden';
-        clearInterval(modalTimerId);
+        // clearInterval(modalTimerId);
     };
 
     const closeModal = () => {
         modal.classList.toggle('show');
         document.body.style.overflow = '';
-    }
+    };
     modalTrigger.forEach(btn => {
         btn.addEventListener('click', openModal);
     });
@@ -147,7 +147,7 @@ window.addEventListener('DOMContentLoaded', () => {
             openModal();
             window.removeEventListener('scroll', showModalByScroll);
         }
-    }
+    };
 
 
     window.addEventListener('scroll', showModalByScroll);
@@ -221,5 +221,57 @@ window.addEventListener('DOMContentLoaded', () => {
         '.menu .container',
         'menu__item'
     ).render();
+
+    //Forms
+
+    const forms = document.querySelectorAll('form');
+
+    const message = {
+        loading: 'Загрузка',
+        succes: 'Спасибо! Скоро мы с вами свяжемя',
+        failue: 'Что-то пошло не так...'
+    };
+    forms.forEach(item => {
+        postData(item);
+    });
+
+    function postData(form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const statusMessage = document.createElement('div');
+            statusMessage.classList.add('status');
+            statusMessage.textContent = message.loading;
+            form.append(statusMessage);
+
+            const request = new XMLHttpRequest();
+            request.open('POST', 'server.php');
+
+            request.setRequestHeader('Content-type', 'application/json');
+            const formData = new FormData(form);
+            const object = {};
+            formData.forEach(function (value, key) {
+                object[key] = value;
+            });
+            const json = JSON.stringify(object);
+
+
+            request.send(json);
+
+            request.addEventListener('load', () => {
+                if (request.status === 200) {
+                    console.log(request.response);
+                    statusMessage.textContent = message.succes;
+                    form.reset();
+                    setTimeout(() => {
+                        statusMessage.remove();
+                    }, 2000);
+                } else {
+                    statusMessage.textContent = message.failure;
+
+                }
+            });
+        });
+    }
 
 });
