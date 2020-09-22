@@ -222,7 +222,6 @@ window.addEventListener('DOMContentLoaded', () => {
     //Forms
 
     const forms = document.querySelectorAll('form');
-
     const message = {
         loading: '../img/form/spinner.svg',
         succes: 'Спасибо! Скоро мы с вами свяжемя',
@@ -235,41 +234,34 @@ window.addEventListener('DOMContentLoaded', () => {
     function postData(form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-
             const statusMessage = document.createElement('img');
             statusMessage.src = message.loading;
             statusMessage.style.cssText = `
             display: block;
             margin: 0 auto;
             `;
-            // form.append(statusMessage);
             form.insertAdjacentElement('afterend', statusMessage);
-
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
-
-            request.setRequestHeader('Content-type', 'application/json');
             const formData = new FormData(form);
             const object = {};
             formData.forEach(function (value, key) {
                 object[key] = value;
             });
-            const json = JSON.stringify(object);
 
-
-            request.send(json);
-
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
+            fetch('server.php', {
+                    method: "POST",
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify(object)
+                }).then(data => data.text)
+                .then(data => {
                     showThanksModal(message.succes);
-
-                    // form.reset();
                     statusMessage.remove();
-                } else {
+                }).catch(() => {
                     showThanksModal(message.failure);
-
-                }
-            });
+                }).finally(() => {
+                    form.reset();
+                });
         });
     }
 
@@ -297,6 +289,5 @@ window.addEventListener('DOMContentLoaded', () => {
 
         }, 4000);
     }
-
 
 });
